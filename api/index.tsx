@@ -366,11 +366,7 @@ Bring the fairy tale to a satisfying close, based on the final choice made in th
         {conclusionText}
       </div>
     ),
-    intents: [
-      <Button value={`${intro} | ${story} | ${finalDecision} | ${conclusionMsg}`}>
-        Save the tale. Forever. (Soon)
-      </Button>
-    ]
+    intents: [<Button value={`Thank you for playing!`}>Save the tale. Forever. (Soon)</Button>]
   });
 });
 
