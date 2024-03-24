@@ -147,17 +147,15 @@ app.frame("/intro", async (c) => {
         {introText}
       </div>
     ),
-    intents: [
-      <Button value={`${introMsg} | 1`}>Choose path 1</Button>,
-      <Button value={`${introMsg} | 2`}>Choose path 2</Button>
-    ]
+    intents: [<Button value={`${introMsg} | 1`}>Choose path 1</Button>, <Button value={`X | 2`}>Choose path 2</Button>]
   });
 });
 
 // Second part of the tale
 app.frame("/story", async (c) => {
-  const { buttonValue } = c;
-  const [introMsg, introChoice] = buttonValue ? buttonValue.split(" | ") : ["", ""];
+  const { buttonIndex, previousButtonValues = [] } = c;
+  const introMsg = previousButtonValues[0] || "";
+  const introChoice = buttonIndex ? buttonIndex : "";
 
   const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
   
@@ -218,15 +216,17 @@ Continue the fairy tale, building upon the path chosen in the previous step. Dev
     ),
     intents: [
       <Button value={`${introMsg} | ${storyMsg} | 1`}>Choose path 1</Button>,
-      <Button value={`${introMsg} | ${storyMsg} | 2`}>Choose path 2</Button>
+      <Button value={`X | Y | 2`}>Choose path 2</Button>
     ]
   });
 });
 
 // Final decision
 app.frame("/finaldecision", async (c) => {
-  const { buttonValue } = c;
-  const [intro, story, choice] = buttonValue ? buttonValue.split(" | ") : ["", "", ""];
+  const { buttonIndex, previousButtonValues = [] } = c;
+  const intro = previousButtonValues[0] || "";
+  const story = previousButtonValues[1] || "";
+  const choice = buttonIndex ? buttonIndex : "";
 
   const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
   
@@ -289,15 +289,21 @@ Advance the fairy tale, following the path selected in the previous step. Raise 
     ),
     intents: [
       <Button value={`${intro} | ${story} | ${finalDecisionMsg} | 1`}>Choose path 1</Button>,
-      <Button value={`${intro} | ${story} | ${finalDecisionMsg} | 2`}>Choose path 2</Button>
+      <Button value={`X | Y | Z | 2`}>Choose path 2</Button>
     ]
   });
 });
 
 // Conclusion
 app.frame("/conclusion", async (c) => {
-  const { buttonValue } = c;
-  const [intro, story, finalDecision, choice] = buttonValue ? buttonValue.split(" | ") : ["", "", ""];
+  // const { buttonValue } = c;
+  // const [intro, story, finalDecision, choice] = buttonValue ? buttonValue.split(" | ") : ["", "", ""];
+
+  const { buttonIndex, previousButtonValues = [] } = c;
+  const intro = previousButtonValues[0] || "";
+  const story = previousButtonValues[1] || "";
+  const finalDecision = previousButtonValues[2] || "";
+  const choice = buttonIndex ? buttonIndex : "";
 
   const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
   
