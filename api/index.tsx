@@ -1,15 +1,19 @@
 import { Button, Frog } from "@airstack/frog";
+import { handle } from "@airstack/frog/vercel";
 import { devtools } from "@airstack/frog/dev";
 import { serveStatic } from "@hono/node-server/serve-static";
 import * as dotenv from "dotenv";
 dotenv.config();
 import Anthropic from "@anthropic-ai/sdk";
 
-export const app = new Frog();
+export const app = new Frog({
+  apiKey: process.env.AIRSTACK_API_KEY as string,
+  assetsPath: "/",
+  basePath: "/api"
+});
 
 // Initial frame
 app.frame("/", async (c) => {
-  const { status } = c;
   return c.res({
     action: "/genre",
     image: "https://www.velvetshark.com/images/MagicMakerFrame.png",
