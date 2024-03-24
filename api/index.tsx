@@ -366,7 +366,10 @@ Bring the fairy tale to a satisfying close, based on the final choice made in th
         {conclusionText}
       </div>
     ),
-    intents: [<Button value={`Thank you for playing!`}>Save the tale. Forever. (Soon)</Button>]
+    intents: [
+      // <Button value={`Thank you for playing! Go check my website.`}>Thank you for playing! Go check my website.</Button>
+      <Button.Link href="https://www.velvetshark.com">Thank you for playing! Go check my website.</Button.Link>
+    ]
   });
 });
 
