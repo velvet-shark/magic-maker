@@ -108,8 +108,8 @@ app.frame("/intro", async (c) => {
     // Uncomment the line you want to use and comment the other two.
 
     // model: "claude-3-opus-20240229",
-    model: "claude-3-sonnet-20240229",
-    // model: "claude-3-haiku-20240307",
+    // model: "claude-3-sonnet-20240229",
+    model: "claude-3-haiku-20240307",
     max_tokens: 1024,
     messages: [{ role: "user", content: `${prompt}` }]
   });
@@ -177,8 +177,8 @@ Continue the fairy tale, building upon the path chosen in the previous step. Dev
 
   const msg = await anthropic.messages.create({
     // model: "claude-3-opus-20240229",
-    model: "claude-3-sonnet-20240229",
-    // model: "claude-3-haiku-20240307",
+    // model: "claude-3-sonnet-20240229",
+    model: "claude-3-haiku-20240307",
     max_tokens: 1024,
     messages: [{ role: "user", content: `${prompt}` }]
   });
@@ -248,8 +248,8 @@ Advance the fairy tale, following the path selected in the previous step. Raise 
 
   const msg = await anthropic.messages.create({
     // model: "claude-3-opus-20240229",
-    model: "claude-3-sonnet-20240229",
-    // model: "claude-3-haiku-20240307",
+    // model: "claude-3-sonnet-20240229",
+    model: "claude-3-haiku-20240307",
     max_tokens: 1024,
     messages: [{ role: "user", content: `${prompt}` }]
   });
