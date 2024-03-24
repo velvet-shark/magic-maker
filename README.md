@@ -47,6 +47,7 @@ npm run dev
 ## 🎯 Future plans
 
 - 🖼️ Generate a fairy tale-style picture after each story segment, relevant to that segment, to increase engagement and interest
+- ✍️ Let users choose the protagonist's name
 - 🍬 Option to mint the final story (with full text and images)
 
 ## 🤝 Contributing

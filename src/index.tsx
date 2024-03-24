@@ -1,19 +1,11 @@
-import { Button, Frog, TextInput } from "@airstack/frog";
+import { Button, Frog } from "@airstack/frog";
 import { devtools } from "@airstack/frog/dev";
 import { serveStatic } from "@hono/node-server/serve-static";
 import * as dotenv from "dotenv";
 dotenv.config();
 import Anthropic from "@anthropic-ai/sdk";
 
-// Defining state where all the important parts will be store that will be needed across frames
-type State = {
-  genre: string;
-  protagonist: string;
-  storyParts: string[];
-};
-
-// export const app = new Frog();
-export const app = new Frog<{ State: State }>();
+export const app = new Frog();
 
 // Initial frame
 app.frame("/", async (c) => {
@@ -81,31 +73,33 @@ app.frame("/protagonist", async (c) => {
           paddingLeft: 40
         }}
       >
-        Genre: {buttonValue}
-        <h1 style={{ marginBottom: 0 }}>Choose a name for your main hero</h1>
+        <span style={{ margin: "20px 0 15px 0", color: "green" }}>Genre: {buttonValue}</span>
+        <h1 style={{ margin: 0 }}>Choose a name for your main hero</h1>
         <h3 style={{ fontSize: 50, marginBottom: 0 }}>🙋‍♀️ Luna</h3>
         <h3 style={{ fontSize: 50, marginBottom: 0 }}>🙋‍♀️ Aria</h3>
         <h3 style={{ fontSize: 50, marginBottom: 0 }}>🙋‍♂️ Finn</h3>
-        <h3 style={{ fontSize: 50, marginBottom: 0 }}>🫵 Your choice</h3>
+        <h3 style={{ fontSize: 50, marginBottom: 0 }}>🙋‍♂️ Elias</h3>
       </div>
     ),
     intents: [
-      <TextInput placeholder="Enter a name of your choice..." />,
-      // <Button value="Luna">Luna</Button>,
       <Button value={`${buttonValue as string} | Luna`}>Luna</Button>,
       <Button value={`${buttonValue as string} | Aria`}>Aria</Button>,
       <Button value={`${buttonValue as string} | Finn`}>Finn</Button>,
-      // <Button value={c.inputText ? c.inputText : ""}>Your choice</Button>
-      <Button value={`${buttonValue as string} | ${c.inputText}`}>Finn</Button>
+      <Button value={`${buttonValue as string} | Elias`}>Elias</Button>
     ]
   });
 });
 
+// First part of the tale
 app.frame("/intro", async (c) => {
   const { buttonValue } = c;
   const [genre, protagonist] = buttonValue ? buttonValue.split(" | ") : ["Princesses & Unicorns", "Luna"]; // Just in case, if error occurs and buttonValue is undefined, default to unicorns and Luna
 
-  const prompt = `Write an engaging introduction to a ${genre} fairy tale, setting the scene and introducing the main character, ${protagonist}. The introduction should hint at the upcoming adventure and the challenges the protagonist might face. End the introduction with a clear decision point, presenting two distinct paths the story could take. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit the introduction to 150 words.`;
+  const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
+  
+  Your task is to guide a curious adventurer through the creation of their own fairy tale, step by step. They have already chosen a genre for their story, as well as the protagonist's name.
+
+  Now, write an engaging introduction to a ${genre} fairy tale, setting the scene, introducing the main character, ${protagonist}, and hinting at the adventures that await. The introduction should hint at the upcoming adventure and the challenges the protagonist might face. End the introduction with a clear decision point, presenting two distinct paths the story could take. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit the introduction to 150 words.`;
 
   const anthropic = new Anthropic({
     apiKey: process.env["ANTHROPIC_API_KEY"]
@@ -126,7 +120,23 @@ app.frame("/intro", async (c) => {
   });
   console.log(msg);
 
+  const introText = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      {msg.content[0].text.split("\n").map((line, index) => (
+        <p key={index} style={{ margin: "0 0 10px 0" }}>
+          {line}
+        </p>
+      ))}
+    </div>
+  );
+
   return c.res({
+    action: "/story",
     image: (
       <div
         style={{
@@ -137,15 +147,80 @@ app.frame("/intro", async (c) => {
           padding: 20
         }}
       >
-        {/* <p>{msg.content[0].text.split("\n").join("<br />")}</p> */}
-        {msg.content[0].text.split("\n").map((line, index) => (
-          <p key={index} style={{ margin: "0 0 10px 0" }}>
-            {line}
-          </p>
-        ))}
+        {introText}
       </div>
     ),
-    intents: [<Button value="1">1</Button>, <Button value="2">2</Button>]
+    intents: [
+      <Button value={`${msg.content[0].text} | 1`}>Choose path 1</Button>,
+      <Button value={`${msg.content[0].text} | 2`}>Choose path 2</Button>
+    ]
+  });
+});
+
+// Second part of the tale
+app.frame("/story", async (c) => {
+  const { buttonValue } = c;
+  const [intro, choice] = buttonValue ? buttonValue.split(" | ") : ["", ""];
+
+  const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
+  
+Your task is to guide a curious adventurer through the creation of their own fairy tale, step by step. They have already chosen a genre for their story and the protagonist's name.
+
+You also have already written an engaging introduction and gave two choices to proceed.
+
+The introduction is as follows: ${intro}.
+
+The choice made was: ${choice}.
+
+Continue the fairy tale, building upon the path chosen in the previous step. Develop the story, introducing new characters, settings, or challenges as appropriate. Maintain a sense of excitement and anticipation. End this segment with another decision point, offering two possible actions to take. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit this segment to 150 words.`;
+
+  const anthropic = new Anthropic({
+    apiKey: process.env["ANTHROPIC_API_KEY"]
+  });
+
+  const msg = await anthropic.messages.create({
+    // model: "claude-3-opus-20240229",
+    model: "claude-3-sonnet-20240229",
+    // model: "claude-3-haiku-20240307",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: `${prompt}` }]
+  });
+  console.log(msg);
+
+  const storyText = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      {msg.content[0].text.split("\n").map((line, index) => (
+        <p key={index} style={{ margin: "0 0 10px 0" }}>
+          {line}
+        </p>
+      ))}
+    </div>
+  );
+
+  return c.res({
+    action: "/middle",
+    image: (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          color: "white",
+          fontSize: 26,
+          padding: 20
+        }}
+      >
+        {storyText}
+      </div>
+    ),
+    intents: [
+      <Button value={`${storyText} | 1`}>Choose path 1</Button>,
+      <Button value={`${storyText} | 2`}>Choose path 2</Button>
+    ]
   });
 });
 
