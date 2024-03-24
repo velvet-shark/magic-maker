@@ -5,8 +5,17 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import Anthropic from "@anthropic-ai/sdk";
 
-export const app = new Frog();
+// Defining state where all the important parts will be store that will be needed across frames
+type State = {
+  genre: string;
+  protagonist: string;
+  storyParts: string[];
+};
 
+// export const app = new Frog();
+export const app = new Frog<{ State: State }>();
+
+// Initial frame
 app.frame("/", async (c) => {
   const { status } = c;
   return c.res({
@@ -25,6 +34,7 @@ app.frame("/", async (c) => {
   });
 });
 
+// Select genre
 app.frame("/genre", async (c) => {
   const randomGenre = getRandomGenre();
 
@@ -56,9 +66,11 @@ app.frame("/genre", async (c) => {
   });
 });
 
+// Select protagonist
 app.frame("/protagonist", async (c) => {
   const { buttonValue } = c;
   return c.res({
+    action: "/intro",
     image: (
       <div
         style={{
@@ -79,19 +91,20 @@ app.frame("/protagonist", async (c) => {
     ),
     intents: [
       <TextInput placeholder="Enter a name of your choice..." />,
-      <Button value="Luna">Luna</Button>,
-      <Button value="Aria">Aria</Button>,
-      <Button value="Finn">Finn</Button>,
-      <Button value={c.inputText ? c.inputText : ""}>Your choice</Button>
+      // <Button value="Luna">Luna</Button>,
+      <Button value={`${buttonValue as string} | Luna`}>Luna</Button>,
+      <Button value={`${buttonValue as string} | Aria`}>Aria</Button>,
+      <Button value={`${buttonValue as string} | Finn`}>Finn</Button>,
+      // <Button value={c.inputText ? c.inputText : ""}>Your choice</Button>
+      <Button value={`${buttonValue as string} | ${c.inputText}`}>Finn</Button>
     ]
   });
 });
 
 app.frame("/intro", async (c) => {
-  const genre = "Princesses & Unicorns";
-  const protagonist = "Luna";
+  const { buttonValue } = c;
+  const [genre, protagonist] = buttonValue ? buttonValue.split(" | ") : ["Princesses & Unicorns", "Luna"]; // Just in case, if error occurs and buttonValue is undefined, default to unicorns and Luna
 
-  // const prompt = `Write an engaging fairy tale introduction in the ${genre} genre with ${protagonist} as the main character. End with a decision point.`;
   const prompt = `Write an engaging introduction to a ${genre} fairy tale, setting the scene and introducing the main character, ${protagonist}. The introduction should hint at the upcoming adventure and the challenges the protagonist might face. End the introduction with a clear decision point, presenting two distinct paths the story could take. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit the introduction to 150 words.`;
 
   const anthropic = new Anthropic({
@@ -99,6 +112,12 @@ app.frame("/intro", async (c) => {
   });
 
   const msg = await anthropic.messages.create({
+    // Decide on the model:
+    // - Opus is best but also slowest and most expensive.
+    // - Haiku is fast and cheap but sometimes doesn't follow the instructions 100%.
+    // - Sonnet is almost as good as Opus, but faster and cheaper, much better at following instructions than Haiku.
+    // Uncomment the line you want to use and comment the other two.
+
     // model: "claude-3-opus-20240229",
     model: "claude-3-sonnet-20240229",
     // model: "claude-3-haiku-20240307",
