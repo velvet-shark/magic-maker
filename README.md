@@ -1,5 +1,7 @@
 # Magic Maker
 
+![Magic Maker Logo](./welcome-screen.png)
+
 ## 🌈 Weave a magic fairy tale in a Farcaster Frame
 
 - 🏰 Guide your hero through an immersive choose-your-own-adventure experience
@@ -40,15 +42,16 @@ npm run dev
 ## 🎨 Technologies Used
 
 - ⚛️ React.js for building the user interface
-- 🐸 Airstack
-- 🌐 Farcaster Frames API for minting stories as NFTs
-- 🤖 Anthropic Claude API (Opus model) for generating story segments
+- 🐸 Airstack Frog Recipes
+- 🤖 Anthropic Claude API (Sonnet model) for generating story segments
+- 🔵 Solidiy smart contract on Base for fairy tale storage
+- 🌐 Farcaster Frames API for storing fairy tales in a smart contract or as an NFT (unfinished)
 
 ## 🎯 Future plans
 
 - 🖼️ Generate a fairy tale-style picture after each story segment, relevant to that segment, to increase engagement and interest
 - ✍️ Let users choose the protagonist's name
-- 🍬 Option to mint the final story (with full text and images)
+- 🍬 Option to store the full story onchain, forever (with full text and images). `FairyTaleStorage` smart contract is already deployed on Base for this purpose: https://basescan.org/address/0xD7c7FAc1973Ed352880ffb9035561dEC7281Bb8f
 
 ## 🤝 Contributing
 
