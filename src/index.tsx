@@ -11,18 +11,9 @@ export const app = new Frog();
 app.frame("/", async (c) => {
   const { status } = c;
   return c.res({
-    image: (
-      <div
-        style={{
-          color: "white",
-          display: "flex",
-          fontSize: 40
-        }}
-      >
-        {status === "initial" ? "Initial Frame" : "Response Frame"}
-      </div>
-    ),
-    intents: [status === "initial" && <Button>Click Here</Button>]
+    action: "/genre",
+    image: "https://www.velvetshark.com/images/MagicMakerFrame.png",
+    intents: [<Button>Let’s make some magic ✨</Button>]
   });
 });
 
