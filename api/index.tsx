@@ -321,8 +321,8 @@ Bring the fairy tale to a satisfying close, based on the final choice made in th
 
   const msg = await anthropic.messages.create({
     // model: "claude-3-opus-20240229",
-    model: "claude-3-sonnet-20240229",
-    // model: "claude-3-haiku-20240307",
+    // model: "claude-3-sonnet-20240229",
+    model: "claude-3-haiku-20240307",
     max_tokens: 1024,
     messages: [{ role: "user", content: `${prompt}` }]
   });
@@ -361,7 +361,9 @@ Bring the fairy tale to a satisfying close, based on the final choice made in th
       </div>
     ),
     intents: [
-      <Button value={`${intro} | ${story} | ${finalDecision} | ${conclusionMsg}`}>Save the tale. Forever.</Button>
+      <Button value={`${intro} | ${story} | ${finalDecision} | ${conclusionMsg}`}>
+        Save the tale. Forever. (Soon)
+      </Button>
     ]
   });
 });
