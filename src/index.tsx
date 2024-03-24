@@ -135,6 +135,8 @@ app.frame("/intro", async (c) => {
     </div>
   );
 
+  const introMsg = msg.content[0].text;
+
   return c.res({
     action: "/story",
     image: (
@@ -151,8 +153,8 @@ app.frame("/intro", async (c) => {
       </div>
     ),
     intents: [
-      <Button value={`${msg.content[0].text} | 1`}>Choose path 1</Button>,
-      <Button value={`${msg.content[0].text} | 2`}>Choose path 2</Button>
+      <Button value={`${introMsg} | 1`}>Choose path 1</Button>,
+      <Button value={`${introMsg} | 2`}>Choose path 2</Button>
     ]
   });
 });
@@ -160,7 +162,7 @@ app.frame("/intro", async (c) => {
 // Second part of the tale
 app.frame("/story", async (c) => {
   const { buttonValue } = c;
-  const [intro, choice] = buttonValue ? buttonValue.split(" | ") : ["", ""];
+  const [introMsg, introChoice] = buttonValue ? buttonValue.split(" | ") : ["", ""];
 
   const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
   
@@ -168,9 +170,9 @@ Your task is to guide a curious adventurer through the creation of their own fai
 
 You also have already written an engaging introduction and gave two choices to proceed.
 
-The introduction is as follows: ${intro}.
+The introduction is as follows: ${introMsg}.
 
-The choice made was: ${choice}.
+The choice made was: ${introChoice}.
 
 Continue the fairy tale, building upon the path chosen in the previous step. Develop the story, introducing new characters, settings, or challenges as appropriate. Maintain a sense of excitement and anticipation. End this segment with another decision point, offering two possible actions to take. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit this segment to 150 words.`;
 
@@ -202,8 +204,10 @@ Continue the fairy tale, building upon the path chosen in the previous step. Dev
     </div>
   );
 
+  const storyMsg = msg.content[0].text;
+
   return c.res({
-    action: "/middle",
+    action: "/finaldecision",
     image: (
       <div
         style={{
@@ -218,8 +222,151 @@ Continue the fairy tale, building upon the path chosen in the previous step. Dev
       </div>
     ),
     intents: [
-      <Button value={`${storyText} | 1`}>Choose path 1</Button>,
-      <Button value={`${storyText} | 2`}>Choose path 2</Button>
+      <Button value={`${introMsg} | ${storyMsg} | 1`}>Choose path 1</Button>,
+      <Button value={`${introMsg} | ${storyMsg} | 2`}>Choose path 2</Button>
+    ]
+  });
+});
+
+// Final decision
+app.frame("/finaldecision", async (c) => {
+  const { buttonValue } = c;
+  const [intro, story, choice] = buttonValue ? buttonValue.split(" | ") : ["", "", ""];
+
+  const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
+  
+Your task is to guide a curious adventurer through the creation of their own fairy tale, step by step. They have already chosen a genre for their story and the protagonist's name.
+
+You also have already written an engaging introduction and gave two choices to proceed. You have also already developed the story and introduced new characters, settings, or challenges, giving another path to take.
+
+The introduction is as follows: ${intro}.
+
+The continuation of the story is as follows: ${story}.
+
+The choice made in the continuation was: ${choice}.
+
+Advance the fairy tale, following the path selected in the previous step. Raise the stakes, introduce plot twists, or present new obstacles to overcome. Build towards the story's climax. Conclude this segment with a final decision point, giving two clear choices that will determine the outcome of the adventure. Each path should be a single sentence, on separate numbered lines, starting with an action verb. Limit this segment to 150 words.`;
+
+  const anthropic = new Anthropic({
+    apiKey: process.env["ANTHROPIC_API_KEY"]
+  });
+
+  const msg = await anthropic.messages.create({
+    // model: "claude-3-opus-20240229",
+    model: "claude-3-sonnet-20240229",
+    // model: "claude-3-haiku-20240307",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: `${prompt}` }]
+  });
+  console.log(msg);
+
+  const finalDecisionText = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      {msg.content[0].text.split("\n").map((line, index) => (
+        <p key={index} style={{ margin: "0 0 10px 0" }}>
+          {line}
+        </p>
+      ))}
+    </div>
+  );
+
+  const finalDecisionMsg = msg.content[0].text;
+
+  return c.res({
+    action: "/conclusion",
+    image: (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          color: "white",
+          fontSize: 26,
+          padding: 20
+        }}
+      >
+        {finalDecisionText}
+      </div>
+    ),
+    intents: [
+      <Button value={`${intro} | ${story} | ${finalDecisionMsg} | 1`}>Choose path 1</Button>,
+      <Button value={`${intro} | ${story} | ${finalDecisionMsg} | 2`}>Choose path 2</Button>
+    ]
+  });
+});
+
+// Conclusion
+app.frame("/conclusion", async (c) => {
+  const { buttonValue } = c;
+  const [intro, story, finalDecision, choice] = buttonValue ? buttonValue.split(" | ") : ["", "", ""];
+
+  const prompt = `You are an enchanted storyteller, a weaver of whimsical fairy tales that captivate and delight. Your magical quill has the power to craft immersive stories based on the choices and desires of those who seek your tales.
+  
+Your task is to guide a curious adventurer through the creation of their own fairy tale, step by step. They have already chosen a genre for their story and the protagonist's name.
+
+You also have already written an engaging introduction and gave two choices to proceed. You have also already developed the story and introduced new characters, settings, or challenges, giving another path to take.
+
+The introduction is as follows: ${intro}.
+
+The continuation of the story is as follows: ${story}.
+
+The final decision part was as follows: ${finalDecision}.
+
+The final choice made was: ${choice}.
+
+Bring the fairy tale to a satisfying close, based on the final choice made in the previous step. Resolve the main conflicts, reveal any remaining secrets, and describe the consequences of the decisions throughout the story. Provide a sense of closure while leaving room for the reader's imagination. If appropriate for the genre and tone, consider ending with a moral or lesson learned. Limit the conclusion to 150 words.`;
+
+  const anthropic = new Anthropic({
+    apiKey: process.env["ANTHROPIC_API_KEY"]
+  });
+
+  const msg = await anthropic.messages.create({
+    // model: "claude-3-opus-20240229",
+    model: "claude-3-sonnet-20240229",
+    // model: "claude-3-haiku-20240307",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: `${prompt}` }]
+  });
+  console.log(msg);
+
+  const conclusionText = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      {msg.content[0].text.split("\n").map((line, index) => (
+        <p key={index} style={{ margin: "0 0 10px 0" }}>
+          {line}
+        </p>
+      ))}
+    </div>
+  );
+
+  const conclusionMsg = msg.content[0].text;
+
+  return c.res({
+    action: "/conclusion",
+    image: (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          color: "white",
+          fontSize: 26,
+          padding: 20
+        }}
+      >
+        {conclusionText}
+      </div>
+    ),
+    intents: [
+      <Button value={`${intro} | ${story} | ${finalDecision} | ${conclusionMsg}`}>Save the tale. Forever.</Button>
     ]
   });
 });
