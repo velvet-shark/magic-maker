@@ -7,7 +7,7 @@
 - 🏰 Guide your hero through an immersive choose-your-own-adventure experience
 - ✨ Watch as the AI crafts unique story segments based on your choices
 - 📜 Enjoy a satisfying conclusion to your fairy tale journey
-- 🖼️ Option to mint your completed story as an NFT on the Farcaster blockchain
+- 🖼️ Option to mint your completed story as an NFT on the Base blockchain (in the future)
 
 ## 🔧 Installation
 
